@@ -11,4 +11,5 @@ urlpatterns = [
 
         # API Routes
     path("questions/all", views.allquestions, name="allquestions"),
+    path("questions/create", views.create_question, name="create_question"),
 ]

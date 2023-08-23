@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // Use buttons to toggle between views
 // document.querySelector('form').onsubmit = () => send_mail();
     document.querySelector('#compose').addEventListener('click', () => compose_question());
+    document.querySelector('form').onsubmit = () => addQ();
 
-
-// By default, load the home
-load_home();
+    // By default, load the home
+    load_home();
 });
 
 function load_home() {
@@ -62,5 +62,53 @@ function compose_question() {
     // Show compose view and hide other views
     document.querySelector('#allquestions-view').style.display = 'none';
     document.querySelector('#compose-view').style.display = 'block';
-    clearFormFields(['title', 'number', 'description', 'tags', 'url']);
+    clearFormFields(['title', 'number', 'description', 'tags', 'url', 'solved-first-time']);
+}
+
+function clearFormFields(fieldIds) {
+    fieldIds.forEach(id => {
+        const field = document.querySelector(`#${id}`);
+        field.value = '';
+        field.classList.remove('is-valid', 'is-invalid');
+    });
+}
+
+function addQ() {
+    // Get form field values
+    const title = document.querySelector('#title').value;
+    const number = document.querySelector('#number').value;
+    const description = document.querySelector('#description').value;
+    const tags = document.querySelector('#tags').value;
+    const url = document.querySelector('#url').value;
+    const solvedFirstTimeCheckbox = document.querySelector('#solved-first-time');
+    const solvedFirstTime = solvedFirstTimeCheckbox.checked;
+
+    // Send post request to upload new question
+    fetch('/questions/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            title: title,
+            number: number,
+            description: description,
+            tags: tags,
+            url: url,
+            solvedfirst: solvedFirstTime
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Print result
+        console.log(result);
+        alert(JSON.stringify(result));
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the question.');
+    });
+
+    clearFormFields(['title', 'number', 'description', 'tags', 'url', 'solved-first-time']);
+    return false;
 }

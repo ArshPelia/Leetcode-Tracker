@@ -87,3 +87,43 @@ def allquestions(request):
     questions = Question.objects.all()
     serializer = QuestionSerializer(questions, many=True)
     return Response(serializer.data)
+
+@csrf_exempt
+@login_required
+def create_question(request):
+
+    # Creating a new question must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    try:
+        data = json.loads(request.body)
+        title = data.get("title", "")
+        number = data.get("number", "")
+        description = data.get("description", "")
+        difficulty = data.get("difficulty", "")
+        tags = data.get("tags", "")
+        url = data.get("url", "")
+        solvedfirst = data.get("solvedfirst", "")
+        print(solvedfirst)
+
+        # Create the Question object
+        question = Question.objects.create(
+            title=title,
+            number=number,
+            description=description,
+            difficulty=difficulty,
+            tags=tags,
+            url=url,
+            solved_first_time=solvedfirst
+        )
+
+        # You can perform additional actions if needed
+        # For example, you might want to add tags to the question or associate it with the current user
+
+        # Redirect the user to the index page with a success message
+        return JsonResponse({'message': 'Question created successfully.'}, status=201)
+    except Exception as e:
+        # Handle any errors that occur during question creation
+        error_message = str(e)
+        return JsonResponse({'error': error_message}, status=400)
