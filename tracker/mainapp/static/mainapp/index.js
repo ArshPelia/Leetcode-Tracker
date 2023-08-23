@@ -62,5 +62,5 @@ function compose_question() {
     // Show compose view and hide other views
     document.querySelector('#allquestions-view').style.display = 'none';
     document.querySelector('#compose-view').style.display = 'block';
-
+    clearFormFields(['title', 'number', 'description', 'tags', 'url']);
 }
