@@ -7,7 +7,11 @@ from django.shortcuts import HttpResponse, HttpResponseRedirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import User
+from .models import User, Question, Note, Progress
+
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .serializers import QuestionSerializer
 
 # Create your views here.
 
@@ -77,3 +81,9 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "mainapp/register.html")
+
+@api_view(['GET'])
+def allquestions(request):
+    questions = Question.objects.all()
+    serializer = QuestionSerializer(questions, many=True)
+    return Response(serializer.data)

@@ -2,7 +2,21 @@
 {% load static %}
 
 {% block body %}
-    <h1>Welcome to Home Page</h1>
+    <h1>Home Page</h1>
+    <h2>Welcome {{request.user.username}}</h2>
+    <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
+
+    <div id="allquestions-view">
+        <!-- contains the content of all questions (initially empty) -->
+    </div>
+
+    <div id="compose-view">
+        <!-- contains a form where the user can compose a new email -->
+    </div>
+
+    <div id="question-view">
+
+    </div>
 {% endblock %}
 
 {% block script %}
