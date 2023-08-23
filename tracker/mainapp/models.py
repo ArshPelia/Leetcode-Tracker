@@ -20,6 +20,7 @@ class Question(models.Model):
     last_attempt = models.DateTimeField(auto_now=True)
     solved_first_time = models.BooleanField()
     attempts = models.PositiveIntegerField(default=1)
+    url = models.URLField(max_length = 300)
 
 class Note(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
