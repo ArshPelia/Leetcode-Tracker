@@ -127,3 +127,11 @@ def create_question(request):
         # Handle any errors that occur during question creation
         error_message = str(e)
         return JsonResponse({'error': error_message}, status=400)
+
+@login_required
+@api_view(['GET'])
+def myquestions(request):
+    user = request.user
+    questions = Question.objects.filter(author=user)  # Assuming you have a foreign key to the User model
+    serializer = QuestionSerializer(questions, many=True)
+    return Response(serializer.data)
