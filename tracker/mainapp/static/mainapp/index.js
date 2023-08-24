@@ -173,6 +173,7 @@ function addQ() {
 
 function importQ(){
     const number = document.querySelector('#import-number').value;
+
     // Fetch request to check if the question exists and retrieve data
     fetch(`/questions/import?number=${number}`)
         .then(response => {
@@ -184,7 +185,11 @@ function importQ(){
         .then(data => {
             // Process the retrieved data, e.g., update UI with the information
             // Update UI with the fetched data
-            alert(JSON.stringify(data));
+            const confirmMessage = `Do you want to add the question "${data.title}" (${data.difficulty}) to the database?`;
+            if (confirm(confirmMessage)) {
+                // User confirmed, proceed to add question to the database
+                addQuestionToDatabase(data);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -192,4 +197,34 @@ function importQ(){
         });
 
     return false;
+}
+
+function addQuestionToDatabase(questionData) {
+    // Send post request to add the question to the database
+    fetch('/questions/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            title: questionData.title,
+            number: questionData.frontendQuestionId,
+            description: '',  // You can provide a default description or leave it empty
+            difficulty: questionData.difficulty.toLowerCase(),  // Convert to lowercase
+            tags: questionData.topicTags.map(tag => tag.name).join(', '),
+            url: `https://leetcode.com/problems/${questionData.titleSlug}`,
+            solvedfirst: false  // Assuming the user hasn't solved it first time
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Print result
+        console.log(result);
+        alert(JSON.stringify(result));
+        clearFormFields(['number']);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while adding the question to the database.');
+    });
 }
