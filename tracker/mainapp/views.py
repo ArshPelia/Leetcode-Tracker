@@ -171,8 +171,8 @@ def get_leetcode_info_by_id(id):
     except json.JSONDecodeError as json_err:
         return JsonResponse({"error": f"JSON decoding error occurred: {json_err}"}, status=500)
     
-
 def import_question(request):
+
     number = request.GET.get('number')
 
     try:
@@ -184,3 +184,27 @@ def import_question(request):
         return JsonResponse({"error": "Question not found."}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+    
+
+def get_question(request):
+    if request.method == 'GET':
+        number = request.GET.get('number')
+
+        try:
+            question = Question.objects.get(number=number)
+            question_data = {
+                'title': question.title,
+                'number': question.number,
+                'difficulty': question.difficulty,
+                'description': question.description,
+                'tags': question.tags,
+                'url': question.url,
+                'solved_first_time': question.solved_first_time
+            }
+            return JsonResponse(question_data, status=200)
+        except Question.DoesNotExist:
+            return JsonResponse({'error': 'Question not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'GET request required.'}, status=400)

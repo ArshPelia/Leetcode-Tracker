@@ -15,10 +15,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#import').addEventListener('click', () => import_question());
     document.querySelector('#import-form').onsubmit = () => importQ();
 
-
-
     // By default, load the home
     load_home();
+    document.querySelector('#allquestions-view').addEventListener('click', function(event) {
+        const row = event.target.closest('tr');
+        if (row) {
+            const number = row.querySelector('td:nth-child(1)').textContent;  // Assuming number is in the first column
+            loadQuestionDetails(number);
+        }
+    });
 });
 
 function switchView(viewId) {
@@ -124,7 +129,6 @@ function import_question() {
     clearFormFields(['number']);
 }
 
-
 function addQ() {
     // Get form field values
     const title = document.querySelector('#title').value;
@@ -228,3 +232,29 @@ function addQuestionToDatabase(questionData) {
         alert('An error occurred while adding the question to the database.');
     });
 }
+
+function loadQuestionDetails(number) {
+    switchView('#question-view');
+
+    // Fetch request to get question details by number
+    fetch(`/questions/getquestion?number=${number}`)
+        .then(response => response.json())
+        .then(question => {
+            // Update the question-view with question details
+            const questionView = document.querySelector('#question-view');
+            questionView.innerHTML = `
+                <h3>${question.title}</h3>
+                <p>Number: ${question.number}</p>
+                <p>Difficulty: ${question.difficulty}</p>
+                <p>Description: ${question.description}</p>
+                <p>Tags: ${question.tags}</p>
+                <p>URL: <a href="${question.url}" target="_blank">${question.url}</a></p>
+                <p>Solved First Time: ${question.solved_first_time ? 'Yes' : 'No'}</p>
+            `;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while loading question details.');
+        });
+}
+
