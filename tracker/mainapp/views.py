@@ -105,11 +105,13 @@ def create_question(request):
         tags = data.get("tags", "")
         url = data.get("url", "")
         solvedfirst = data.get("solvedfirst", "")
+        user = request.user 
         print(solvedfirst)
 
         # Create the Question object
         question = Question.objects.create(
             title=title,
+            author=user,
             number=number,
             description=description,
             difficulty=difficulty,

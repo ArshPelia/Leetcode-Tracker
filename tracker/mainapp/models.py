@@ -7,6 +7,7 @@ class User(AbstractUser):
 
 class Question(models.Model):
     title = models.CharField(max_length=200)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     number = models.PositiveIntegerField(unique=True)
     description = models.TextField()
     DIFFICULTY_CHOICES = [

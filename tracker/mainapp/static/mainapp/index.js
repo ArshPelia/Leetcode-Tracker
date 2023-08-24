@@ -143,12 +143,13 @@ function addQ() {
         // Print result
         console.log(result);
         alert(JSON.stringify(result));
+        clearFormFields(['title', 'number', 'description', 'tags', 'url', 'solved-first-time']);
+
     })
     .catch(error => {
         console.error('Error:', error);
         alert('An error occurred while creating the question.');
     });
 
-    clearFormFields(['title', 'number', 'description', 'tags', 'url', 'solved-first-time']);
     return false;
 }
