@@ -2,7 +2,9 @@
 {% load static %}
 
 {% block body %}
-    <a class="btn btn-sm btn-outline-primary" href="{% url 'index' %}"><h2>Home Page</h2></a>
+    <a class="btn btn-sm btn-outline-primary" href="{% url 'index' %}">
+        <h2>Home Page</h2>
+    </a>
     <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
     <h2>Welcome {{request.user.username}}</h2>
     <button class="btn btn-sm btn-outline-primary" id="compose">Compose</button>
