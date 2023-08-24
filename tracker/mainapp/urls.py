@@ -13,5 +13,6 @@ urlpatterns = [
     path("questions/all", views.allquestions, name="allquestions"),
     path("questions/create", views.create_question, name="create_question"),
     path("questions/myquestions", views.myquestions, name="myquestions"),
+    path('questions/import', views.import_question, name='import_question')
     
 ]

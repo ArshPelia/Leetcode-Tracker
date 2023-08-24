@@ -1,4 +1,7 @@
 import json
+import requests
+import sys
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
@@ -12,6 +15,10 @@ from .models import User, Question, Note, Progress
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import QuestionSerializer
+
+from requests.exceptions import HTTPError, ConnectionError, Timeout, RequestException
+# Load environment variables from file
+from dotenv import load_dotenv
 
 # Create your views here.
 
@@ -88,6 +95,14 @@ def allquestions(request):
     serializer = QuestionSerializer(questions, many=True)
     return Response(serializer.data)
 
+@login_required
+@api_view(['GET'])
+def myquestions(request):
+    user = request.user
+    questions = Question.objects.filter(author=user)  # Assuming you have a foreign key to the User model
+    serializer = QuestionSerializer(questions, many=True)
+    return Response(serializer.data)
+
 @csrf_exempt
 @login_required
 def create_question(request):
@@ -130,10 +145,42 @@ def create_question(request):
         error_message = str(e)
         return JsonResponse({'error': error_message}, status=400)
 
-@login_required
-@api_view(['GET'])
-def myquestions(request):
-    user = request.user
-    questions = Question.objects.filter(author=user)  # Assuming you have a foreign key to the User model
-    serializer = QuestionSerializer(questions, many=True)
-    return Response(serializer.data)
+def get_leetcode_info_by_id(id):
+    try:
+        # Load environment variables from .env file
+        load_dotenv(".venv")
+
+        # URL
+        LEETCODE_INFO_URL = "https://lcid.cc/info/"
+
+        leetcode_url = f"{LEETCODE_INFO_URL}{id}"
+        resInfo = requests.get(leetcode_url, timeout=3)
+        resInfo.raise_for_status()
+
+        # The response seems successful, parse and return the data
+        return resInfo.json()
+
+    except HTTPError as errh:
+        return JsonResponse({"error": f"HTTP error occurred: {errh}"}, status=500)
+    except ConnectionError as errc:
+        return JsonResponse({"error": f"Connection error occurred: {errc}"}, status=500)
+    except Timeout as errt:
+        return JsonResponse({"error": f"Timeout error occurred: {errt}"}, status=500)
+    except RequestException as err:
+        return JsonResponse({"error": f"Request exception occurred: {err}"}, status=500)
+    except json.JSONDecodeError as json_err:
+        return JsonResponse({"error": f"JSON decoding error occurred: {json_err}"}, status=500)
+    
+
+def import_question(request):
+    number = request.GET.get('number')
+
+    try:
+        leetcode_info = get_leetcode_info_by_id(number)  # Assuming get_leetcode_info_by_id is defined
+        print(leetcode_info)
+        return JsonResponse(leetcode_info, status=200)
+    
+    except Question.DoesNotExist:
+        return JsonResponse({"error": "Question not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

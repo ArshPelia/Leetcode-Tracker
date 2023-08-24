@@ -7,21 +7,34 @@
 document.addEventListener('DOMContentLoaded', function() {
 
 // Use buttons to toggle between views
-// document.querySelector('form').onsubmit = () => send_mail();
-    document.querySelector('#compose').addEventListener('click', () => compose_question());
-    // Add an event listener for the "My Questions" button
     document.querySelector('#myquestions').addEventListener('click', () => loadMyQuestions());
-    document.querySelector('form').onsubmit = () => addQ();
+
+    document.querySelector('#compose').addEventListener('click', () => compose_question());
+    document.querySelector('#compose-form').onsubmit = () => addQ();
+
+    document.querySelector('#import').addEventListener('click', () => import_question());
+    document.querySelector('#import-form').onsubmit = () => importQ();
+
+
 
     // By default, load the home
     load_home();
 });
 
+function switchView(viewId) {
+    const views = ['#allquestions-view', '#compose-view', '#question-view', '#import-view'];
+    views.forEach(view => {
+        if (view === viewId) {
+            document.querySelector(view).style.display = 'block';
+        } else {
+            document.querySelector(view).style.display = 'none';
+        }
+    });
+}
+
 function load_home() {
     // Show the mailbox and hide other views
-    document.querySelector('#allquestions-view').style.display = 'block';
-    document.querySelector('#compose-view').style.display = 'none';
-    document.querySelector('#question-view').style.display = 'none';
+    switchView('#allquestions-view');
 
     // Fetch all questions from the backend
     fetch('/questions/all')
@@ -41,18 +54,10 @@ function load_home() {
             alert('An error occurred while loading questions.');
         });
 }
-function compose_question() {
-    // Show compose view and hide other views
-    document.querySelector('#allquestions-view').style.display = 'none';
-    document.querySelector('#compose-view').style.display = 'block';
-    clearFormFields(['title', 'number', 'description', 'tags', 'url', 'solved-first-time']);
-}
 
 function loadMyQuestions() {
     // Show the appropriate view and hide other views
-    document.querySelector('#allquestions-view').style.display = 'block';
-    document.querySelector('#compose-view').style.display = 'none';
-    document.querySelector('#question-view').style.display = 'none';
+    switchView('#allquestions-view');
 
     // Fetch the user's questions from the backend
     fetch('/questions/myquestions')
@@ -72,7 +77,6 @@ function loadMyQuestions() {
             alert('An error occurred while loading your questions.');
         });
 }
-
 
 function createQuestionTable(questions) {
     const table = document.createElement('table');
@@ -107,6 +111,19 @@ function clearFormFields(fieldIds) {
         field.classList.remove('is-valid', 'is-invalid');
     });
 }
+
+function compose_question() {
+    // Show compose view and hide other views
+    switchView('#compose-view');
+    clearFormFields(['title', 'number', 'description', 'tags', 'url', 'solved-first-time']);
+}
+
+function import_question() {
+    // Show compose view and hide other views
+    switchView('#import-view');
+    clearFormFields(['number']);
+}
+
 
 function addQ() {
     // Get form field values
@@ -150,6 +167,29 @@ function addQ() {
         console.error('Error:', error);
         alert('An error occurred while creating the question.');
     });
+
+    return false;
+}
+
+function importQ(){
+    const number = document.querySelector('#import-number').value;
+    // Fetch request to check if the question exists and retrieve data
+    fetch(`/questions/import?number=${number}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Process the retrieved data, e.g., update UI with the information
+            // Update UI with the fetched data
+            alert(JSON.stringify(data));
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while importing the question.');
+        });
 
     return false;
 }

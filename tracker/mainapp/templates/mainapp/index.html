@@ -10,6 +10,7 @@
     <!-- Add this button/link to your HTML -->
     <button class="btn btn-sm btn-outline-primary" id="myquestions">My Questions</button>
     <button class="btn btn-sm btn-outline-primary" id="compose">Compose</button>
+    <button class="btn btn-sm btn-outline-primary" id="import">Import Question</button>
 
 
     <div id="allquestions-view">
@@ -58,6 +59,23 @@
     <div id="question-view">
 
     </div>
+
+    <div id="import-view">
+        <h3>Compose a New Question</h3>
+        <form id="import-form">
+            <div class="mb-3">
+                <label for="number" class="form-label">Number</label>
+                <input type="number" class="form-control" id="import-number" required>
+            </div>
+            <div class="mb-3"> 
+                <label for="solved-first-time">Solved First Time</label>
+                <input type="checkbox" id="solved-first-time">
+            </div>
+            <button type="submit" class="btn btn-primary">Import</button>
+        </form>
+    </div> 
+
+    
 {% endblock %}
 
 {% block script %}
