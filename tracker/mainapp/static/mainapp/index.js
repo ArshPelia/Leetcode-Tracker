@@ -4,28 +4,30 @@
   Ensures use of the function to only run the code once all content has loaded
    
    */
+// Wait for the DOM content to load before attaching event listeners
 document.addEventListener('DOMContentLoaded', function() {
 
-// Use buttons to toggle between views
-    document.querySelector('#myquestions').addEventListener('click', () => loadMyQuestions());
+    // Attach event listeners to buttons
+    document.querySelector('#myquestions').addEventListener('click', loadMyQuestions);
+    document.querySelector('#compose').addEventListener('click', composeQuestion);
+    document.querySelector('#compose-form').onsubmit = addQuestion;
+    document.querySelector('#import').addEventListener('click', importQuestion);
+    document.querySelector('#import-form').onsubmit = importQ;
+    
+    // Load the home view by default
+    loadHome();
 
-    document.querySelector('#compose').addEventListener('click', () => compose_question());
-    document.querySelector('#compose-form').onsubmit = () => addQ();
-
-    document.querySelector('#import').addEventListener('click', () => import_question());
-    document.querySelector('#import-form').onsubmit = () => importQ();
-
-    // By default, load the home
-    load_home();
+    // Attach event listener to table rows
     document.querySelector('#allquestions-view').addEventListener('click', function(event) {
         const row = event.target.closest('tr');
         if (row) {
-            const number = row.querySelector('td:nth-child(1)').textContent;  // Assuming number is in the first column
+            const number = row.querySelector('td:nth-child(1)').textContent; // Assuming number is in the first column
             loadQuestionDetails(number);
         }
     });
 });
 
+// Switches between different views by showing/hiding elements
 function switchView(viewId) {
     const views = ['#allquestions-view', '#compose-view', '#question-view', '#import-view'];
     views.forEach(view => {
@@ -37,21 +39,16 @@ function switchView(viewId) {
     });
 }
 
-function load_home() {
-    // Show the mailbox and hide other views
+// Loads the default home view
+function loadHome() {
     switchView('#allquestions-view');
 
-    // Fetch all questions from the backend
     fetch('/questions/all')
         .then(response => response.json())
         .then(questions => {
-            // Create and populate the table
             const table = createQuestionTable(questions);
-
-            // Replace the content of the allquestions-view with the table
             const allQuestionsView = document.querySelector('#allquestions-view');
-            allQuestionsView.innerHTML = '';
-            document.querySelector('#allquestions-view').innerHTML = `<h3>All Questions</h3>`;
+            allQuestionsView.innerHTML = '<h3>All Questions</h3>';
             allQuestionsView.appendChild(table);
         })
         .catch(error => {
@@ -60,21 +57,16 @@ function load_home() {
         });
 }
 
+// Loads the user's questions
 function loadMyQuestions() {
-    // Show the appropriate view and hide other views
     switchView('#allquestions-view');
 
-    // Fetch the user's questions from the backend
     fetch('/questions/myquestions')
         .then(response => response.json())
         .then(questions => {
-            // Create and populate the table
             const table = createQuestionTable(questions);
-
-            // Replace the content of the allquestions-view with the table
             const allQuestionsView = document.querySelector('#allquestions-view');
-            allQuestionsView.innerHTML = '';
-            document.querySelector('#allquestions-view').innerHTML = `<h3>My Questions</h3>`;
+            allQuestionsView.innerHTML = '<h3>My Questions</h3>';
             allQuestionsView.appendChild(table);
         })
         .catch(error => {
@@ -83,11 +75,11 @@ function loadMyQuestions() {
         });
 }
 
+// Creates and populates a question table
 function createQuestionTable(questions) {
     const table = document.createElement('table');
     table.classList.add('table', 'table-striped', 'table-hover');
 
-    // Create the table header
     const headerRow = table.insertRow();
     const headers = ['Number', 'Title', 'Difficulty', 'Tags', 'Attempts'];
     headers.forEach(headerText => {
@@ -96,7 +88,6 @@ function createQuestionTable(questions) {
         headerRow.appendChild(headerCell);
     });
 
-    // Populate the table rows with question data
     questions.forEach(question => {
         const row = table.insertRow();
         const cells = [question.number, question.title, question.difficulty, question.tags, question.attempts];
@@ -109,6 +100,7 @@ function createQuestionTable(questions) {
     return table;
 }
 
+// Clears form fields and removes validation classes
 function clearFormFields(fieldIds) {
     fieldIds.forEach(id => {
         const field = document.querySelector(`#${id}`);
@@ -117,19 +109,19 @@ function clearFormFields(fieldIds) {
     });
 }
 
-function compose_question() {
-    // Show compose view and hide other views
+// Shows the compose view and clears form fields
+function composeQuestion() {
     switchView('#compose-view');
     clearFormFields(['title', 'number', 'description', 'tags', 'url', 'solved-first-time']);
 }
 
-function import_question() {
+function importQuestion() {
     // Show compose view and hide other views
     switchView('#import-view');
     clearFormFields(['number']);
 }
 
-function addQ() {
+function addQuestion() {
     // Get form field values
     const title = document.querySelector('#title').value;
     const number = document.querySelector('#number').value;
