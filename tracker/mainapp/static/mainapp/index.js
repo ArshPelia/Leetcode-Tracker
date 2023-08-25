@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#compose-form').onsubmit = addQuestion;
     document.querySelector('#import').addEventListener('click', importQuestion);
     document.querySelector('#import-form').onsubmit = importQ;
+    document.querySelector('#add-note-form').onsubmit = addNote;
     
     // Load the home view by default
     loadHome();
@@ -167,6 +168,38 @@ function addQuestion() {
     return false;
 }
 
+function addNote(questionNumber, content) {
+    fetch('/questions/createnote', {  // Make sure the URL path is correct
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            question_number: questionNumber,
+            content: content,
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Print result
+        console.log(result);
+
+        // Add the new note to the notes list
+        const notesList = document.getElementById('notes-list');
+        const newNoteItem = document.createElement('li');
+        newNoteItem.textContent = content;
+        notesList.appendChild(newNoteItem);
+
+        // Clear the note content input
+        document.querySelector('#note-content').value = '';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while adding the note.');
+    });
+}
+
+
 function importQ(){
     const number = document.querySelector('#import-number').value;
 
@@ -230,23 +263,60 @@ function loadQuestionDetails(number) {
 
     // Fetch request to get question details by number
     fetch(`/questions/getquestion?number=${number}`)
+    .then(response => response.json())
+    .then(question => {
+        // Update the question-view with question details
+        const questionView = document.querySelector('#question-view');
+        questionView.innerHTML = `
+            <!-- Display question details ... -->
+            <h3>${question.title}</h3>
+            <p>Number: ${question.number}</p>
+            <p>Difficulty: ${question.difficulty}</p>
+            <p>Description: ${question.description}</p>
+            <p>Tags: ${question.tags}</p>
+            <p>URL: <a href="${question.url}" target="_blank">${question.url}</a></p>
+            <p>Solved First Time: ${question.solved_first_time ? 'Yes' : 'No'}</p>
+
+            <!-- Notes section -->
+            <div id="notes-section">
+                <h4>Notes:</h4>
+                <ul id="notes-list"></ul>
+                <form id="add-note-form">
+                    <input type="text" id="note-content" placeholder="Add a note...">
+                    <button type="submit">Add Note</button>
+                </form>
+            </div>
+        `;
+
+        // Fetch notes for the question
+        fetch(`/questions/getnotes?question_number=${question.number}`)
         .then(response => response.json())
-        .then(question => {
-            // Update the question-view with question details
-            const questionView = document.querySelector('#question-view');
-            questionView.innerHTML = `
-                <h3>${question.title}</h3>
-                <p>Number: ${question.number}</p>
-                <p>Difficulty: ${question.difficulty}</p>
-                <p>Description: ${question.description}</p>
-                <p>Tags: ${question.tags}</p>
-                <p>URL: <a href="${question.url}" target="_blank">${question.url}</a></p>
-                <p>Solved First Time: ${question.solved_first_time ? 'Yes' : 'No'}</p>
-            `;
+        .then(notes => {
+            // Display notes in the notes section
+            const notesList = document.getElementById('notes-list');
+            notes.forEach(note => {  // This is where the error occurs
+                const listItem = document.createElement('li');
+                listItem.textContent = note.content;
+                notesList.appendChild(listItem);
+            });
+    
+            // Add event listener to the note submission form
+            const addNoteForm = document.querySelector('#add-note-form');
+            addNoteForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const noteContent = document.querySelector('#note-content').value;
+                if (noteContent.trim() !== '') {
+                    addNote(question.number, noteContent);
+                }
+            });
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while loading question details.');
+            console.error('Error fetching notes:', error);
         });
+    
+    })
+    .catch(error => {
+        console.error('Error fetching question details:', error);
+        alert('An error occurred while loading question details.');
+    });
 }
-

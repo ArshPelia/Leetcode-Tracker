@@ -14,7 +14,7 @@ from .models import User, Question, Note, Progress
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import QuestionSerializer
+from .serializers import QuestionSerializer, NoteSerializer
 
 from requests.exceptions import HTTPError, ConnectionError, Timeout, RequestException
 # Load environment variables from file
@@ -208,3 +208,51 @@ def get_question(request):
             return JsonResponse({'error': str(e)}, status=500)
     else:
         return JsonResponse({'error': 'GET request required.'}, status=400)
+    
+
+# ... your other imports ...
+
+# New API endpoint to create a note
+@csrf_exempt
+@login_required
+def create_note(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            question_number = data.get("question_number", "")
+            content = data.get("content", "")
+            
+            user = request.user
+            question = Question.objects.get(number=question_number)
+            
+            note = Note.objects.create(
+                user=user,
+                question=question,
+                content=content
+            )
+            
+            return JsonResponse({'message': 'Note created successfully.'}, status=201)
+        except Exception as e:
+            error_message = str(e)
+            return JsonResponse({'error': error_message}, status=400)
+
+# New API endpoint to fetch notes for a question
+@api_view(['GET'])
+@login_required
+def get_notes(request):
+    if request.method == 'GET':
+        question_number = request.GET.get('question_number')
+        
+        try:
+            print('trying')
+            question = Question.objects.get(number=question_number)
+            notes = Note.objects.filter(question=question)
+            print('note')
+            serializer = NoteSerializer(notes, many=True)
+            return Response(serializer.data)
+
+        except Question.DoesNotExist:
+            return JsonResponse({'error': 'Question not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
