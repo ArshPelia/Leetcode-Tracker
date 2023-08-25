@@ -85,7 +85,7 @@ function loadMyQuestions() {
 
 function createQuestionTable(questions) {
     const table = document.createElement('table');
-    table.classList.add('table', 'table-striped');
+    table.classList.add('table', 'table-striped', 'table-hover');
 
     // Create the table header
     const headerRow = table.insertRow();
