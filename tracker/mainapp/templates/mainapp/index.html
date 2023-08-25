@@ -1,11 +1,18 @@
 {% extends "mainapp/layout.html" %}
 {% load static %}
+{% block head %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">Your App Name</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
+    </div>
+</nav>
+
+{% endblock %}
+
 
 {% block body %}
-    <a class="btn btn-sm btn-outline-primary" href="{% url 'index' %}">
-        <h2>Home Page</h2>
-    </a>
-    <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
+    <!-- <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a> -->
     <h2>Welcome {{request.user.username}}</h2>
     <!-- Add this button/link to your HTML -->
     <button class="btn btn-sm btn-outline-primary" id="myquestions">My Questions</button>
@@ -80,4 +87,6 @@
 
 {% block script %}
     <script src="{% static 'mainapp/index.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 {% endblock %}
