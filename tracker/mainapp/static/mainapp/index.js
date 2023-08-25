@@ -1,3 +1,13 @@
+// Define a global object to store filter configurations
+const filterConfig = {
+    difficulty: null,
+    tags: []
+};
+
+// Global variable to store the loaded questions data
+let questionsall = [];
+
+
 /* when the DOM content of the page has been loaded, 
   we attach event listeners to each of the buttons. 
   
@@ -25,7 +35,82 @@ document.addEventListener('DOMContentLoaded', function() {
             loadQuestionDetails(number);
         }
     });
+
+    // Attach event listeners to filters
+    document.querySelector('#difficulty-filter').addEventListener('change', event => {
+        const selectedDifficulty = event.target.value;
+        filterConfig.difficulty = selectedDifficulty;
+        updateTable();
+    });
+
+    document.querySelectorAll('#tag-filters input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', event => {
+            const selectedTag = event.target.value;
+            if (event.target.checked) {
+                filterConfig.tags.push(selectedTag);
+            } else {
+                filterConfig.tags = filterConfig.tags.filter(tag => tag !== selectedTag);
+            }
+            updateTable();
+        });
+    });
 });
+
+// Apply filters to questions based on filterConfig
+function applyFilters(questions) {
+    console.log('Applying Filters');
+    console.log('Filter Config:', filterConfig);
+    
+    let filteredQuestions = questions;
+    
+    if (filterConfig.difficulty) {
+        filteredQuestions = filteredQuestions.filter(question => question.difficulty === filterConfig.difficulty);
+    }
+    
+    if (filterConfig.tags.length > 0) {
+        filteredQuestions = filteredQuestions.filter(question =>
+            filterConfig.tags.every(tag => question.tags.includes(tag))
+        );
+    }
+    
+    console.log('Filtered Questions:', filteredQuestions);
+    
+    return filteredQuestions;
+}
+// Update the table with filtered questions
+// ...
+
+// Update the table with filtered questions
+function updateTable() {
+    console.log('Updating Table');
+    const filteredQuestions = applyFilters(questionsall);
+    console.log('Filtered Questions:', filteredQuestions);
+
+    try {
+        const table = createQuestionTable(filteredQuestions);
+        if (!table) {
+            console.log('Table creation failed.');
+            return;
+        }
+
+        const questionView = document.querySelector('#allquestions-view');
+        if (!questionView) {
+            console.log('Question view element not found.');
+            return;
+        }
+
+        const filtersSection = document.querySelector('#filters');
+        questionView.innerHTML = ''; // Clear existing content
+        questionView.appendChild(filtersSection); // Re-append the filters
+        questionView.appendChild(table);
+
+        console.log('Table updated successfully.');
+    } catch (error) {
+        console.error('Error updating table:', error);
+    }
+}
+
+// ...
 
 // Switches between different views by showing/hiding elements
 function switchView(viewId) {
@@ -46,9 +131,12 @@ function loadHome() {
     fetch('/questions/all')
         .then(response => response.json())
         .then(questions => {
+            questionsall = questions
+            const filtersSection = document.querySelector('#filters');
             const table = createQuestionTable(questions);
             const allQuestionsView = document.querySelector('#allquestions-view');
-            allQuestionsView.innerHTML = '<h3>All Questions</h3>';
+            // allQuestionsView.innerHTML = '<h3>All Questions</h3>';
+            allQuestionsView.appendChild(filtersSection);
             allQuestionsView.appendChild(table);
         })
         .catch(error => {
@@ -59,6 +147,8 @@ function loadHome() {
 
 // Creates and populates a question table
 function createQuestionTable(questions) {
+    console.log('Creating table with questions:', questions);
+    
     const table = document.createElement('table');
     table.classList.add('table', 'table-striped', 'table-hover');
 
@@ -79,8 +169,10 @@ function createQuestionTable(questions) {
         });
     });
 
+    console.log('Table created:', table);
     return table;
 }
+
 
 // Clears form fields and removes validation classes
 function clearFormFields(fieldIds) {
@@ -179,7 +271,6 @@ function addNote(questionNumber, content) {
         alert('An error occurred while adding the note.');
     });
 }
-
 
 function importQ(){
     const number = document.querySelector('#import-number').value;
