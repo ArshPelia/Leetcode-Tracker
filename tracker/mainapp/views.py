@@ -37,7 +37,6 @@ def index(request):
     else:
         return HttpResponseRedirect(reverse("login"))
 
-
 def login_view(request):
     if request.method == "POST":
 
@@ -57,11 +56,9 @@ def login_view(request):
     else:
         return render(request, "mainapp/login.html")
 
-
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
-
 
 def register(request):
     if request.method == "POST":
@@ -89,17 +86,10 @@ def register(request):
     else:
         return render(request, "mainapp/register.html")
 
+@login_required
 @api_view(['GET'])
 def allquestions(request):
     questions = Question.objects.all()
-    serializer = QuestionSerializer(questions, many=True)
-    return Response(serializer.data)
-
-@login_required
-@api_view(['GET'])
-def myquestions(request):
-    user = request.user
-    questions = Question.objects.filter(author=user)  # Assuming you have a foreign key to the User model
     serializer = QuestionSerializer(questions, many=True)
     return Response(serializer.data)
 
@@ -184,7 +174,6 @@ def import_question(request):
         return JsonResponse({"error": "Question not found."}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-    
 
 def get_question(request):
     if request.method == 'GET':
@@ -209,10 +198,7 @@ def get_question(request):
     else:
         return JsonResponse({'error': 'GET request required.'}, status=400)
     
-
-# ... your other imports ...
-
-# New API endpoint to create a note
+# API endpoint to create a note
 @csrf_exempt
 @login_required
 def create_note(request):
@@ -236,7 +222,7 @@ def create_note(request):
             error_message = str(e)
             return JsonResponse({'error': error_message}, status=400)
 
-# New API endpoint to fetch notes for a question
+# API endpoint to fetch notes for a question
 @api_view(['GET'])
 @login_required
 def get_notes(request):

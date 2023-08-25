@@ -8,7 +8,6 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // Attach event listeners to buttons
-    document.querySelector('#myquestions').addEventListener('click', loadMyQuestions);
     document.querySelector('#compose').addEventListener('click', composeQuestion);
     document.querySelector('#compose-form').onsubmit = addQuestion;
     document.querySelector('#import').addEventListener('click', importQuestion);
@@ -55,24 +54,6 @@ function loadHome() {
         .catch(error => {
             console.error('Error:', error);
             alert('An error occurred while loading questions.');
-        });
-}
-
-// Loads the user's questions
-function loadMyQuestions() {
-    switchView('#allquestions-view');
-
-    fetch('/questions/myquestions')
-        .then(response => response.json())
-        .then(questions => {
-            const table = createQuestionTable(questions);
-            const allQuestionsView = document.querySelector('#allquestions-view');
-            allQuestionsView.innerHTML = '<h3>My Questions</h3>';
-            allQuestionsView.appendChild(table);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while loading your questions.');
         });
 }
 

@@ -12,7 +12,6 @@ urlpatterns = [
         # API Routes
     path("questions/all", views.allquestions, name="allquestions"),
     path("questions/create", views.create_question, name="create_question"),
-    path("questions/myquestions", views.myquestions, name="myquestions"),
     path('questions/import', views.import_question, name='import_question'),
     path('questions/getquestion', views.get_question, name='get_question'),
     path('questions/getnotes', views.get_notes, name='get_notes'),
