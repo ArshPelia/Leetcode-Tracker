@@ -131,11 +131,13 @@ function loadHome() {
     fetch('/questions/all')
         .then(response => response.json())
         .then(questions => {
-            questionsall = questions
+            questionsall = questions;
             const filtersSection = document.querySelector('#filters');
             const table = createQuestionTable(questions);
             const allQuestionsView = document.querySelector('#allquestions-view');
-            // allQuestionsView.innerHTML = '<h3>All Questions</h3>';
+            // Clear and re-append the filters section
+            // filtersSection.innerHTML = '';
+            filtersSection.appendChild(createTagCheckboxes(questions));
             allQuestionsView.appendChild(filtersSection);
             allQuestionsView.appendChild(table);
         })
@@ -144,6 +146,43 @@ function loadHome() {
             alert('An error occurred while loading questions.');
         });
 }
+
+// Create checkboxes for all unique tags
+function createTagCheckboxes(questions) {
+    const tagFiltersDiv = document.createElement('div');
+    tagFiltersDiv.id = 'tag-filters';
+
+    // Find all unique tags
+    const uniqueTags = Array.from(new Set(questions.flatMap(question => question.tags)));
+
+    // Create checkboxes for unique tags
+    uniqueTags.forEach(tag => {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `tag-filter-${tag}`;
+        checkbox.value = tag;
+        checkbox.addEventListener('change', event => {
+            const selectedTag = event.target.value;
+            if (event.target.checked) {
+                filterConfig.tags.push(selectedTag);
+            } else {
+                filterConfig.tags = filterConfig.tags.filter(tag => tag !== selectedTag);
+            }
+            updateTable();
+        });
+
+        const label = document.createElement('label');
+        label.htmlFor = `tag-filter-${tag}`;
+        label.textContent = tag;
+
+        tagFiltersDiv.appendChild(checkbox);
+        tagFiltersDiv.appendChild(label);
+        tagFiltersDiv.appendChild(document.createElement('br'));
+    });
+
+    return tagFiltersDiv;
+}
+
 
 // Creates and populates a question table
 function createQuestionTable(questions) {
