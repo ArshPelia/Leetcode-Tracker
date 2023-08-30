@@ -1,7 +1,8 @@
 // Define a global object to store filter configurations
 const filterConfig = {
     difficulty: null,
-    tags: []
+    tags: [],
+    searchQuery: ''
 };
 
 // Global variable to store the loaded questions data
@@ -75,9 +76,13 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTable();
     });
 
+    document.querySelector('#search-input').addEventListener('input', event => {
+        const searchQuery = event.target.value.toLowerCase();
+        filterConfig.searchQuery = searchQuery;
+        updateTable();
+    });
     
-    
-    
+
 });
 
 function isTagSelected(tag) {
@@ -98,6 +103,15 @@ function applyFilters(questions) {
         });
     }
 
+    if (filterConfig.searchQuery) {
+        filteredQuestions = filteredQuestions.filter(question => {
+            return (
+                question.title.toLowerCase().includes(filterConfig.searchQuery) ||
+                question.tags.toLowerCase().includes(filterConfig.searchQuery)
+            );
+        });
+    }
+
     return filteredQuestions;
 }
 
@@ -107,6 +121,7 @@ function updateTable() {
 
     const questionView = document.querySelector('#allquestions-view');
     const filtersSection = document.querySelector('#filters');
+    const searchInput = document.querySelector('#search-input');
 
     // Clear the table content but keep the filters section
     while (questionView.firstChild) {
@@ -134,7 +149,9 @@ function updateTable() {
         tagsSelect.appendChild(option);
     });
 
+    questionView.appendChild(searchInput);
     questionView.appendChild(table);
+    document.getElementById("search-input").focus();
     console.log(filterConfig);
 }
 
