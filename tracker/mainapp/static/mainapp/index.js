@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#compose').addEventListener('click', composeQuestion);
     document.querySelector('#compose-form').onsubmit = addQuestion;
     document.querySelector('#import').addEventListener('click', importQuestion);
+    // document.querySelector('#importall').addEventListener('click', importall);
     document.querySelector('#import-form').onsubmit = importQ;
     document.querySelector('#add-note-form').onsubmit = addNote;
     
@@ -338,6 +339,33 @@ function importQ(){
 
     return false;
 }
+
+function importall(){
+   const problems = [1768, 389, 28, 459, 283, 66, 1822, 1502, 896, 13, 58, 709, 88, 27, 26, 121, 14, 125, 392, 1071, 1431, 605, 354, 643, 724, 350, 682, 657, 1275, 1041, 1672, 1672, 1572, 54, 73, 104, 100, 226, 101, 112, 637, 108, 872, 700, 94, 543, 530, 35, 374, 136, 68, 1523, 1491, 860, 976, 1232, 67, 228, 9, 171, 326, 21, 206, 141, 160, 234, 20, 933, 242, 383, 1, 205, 290, 202, 219, 2215, 1207, 169, 217, 387]
+   problems.forEach(import_all)
+}
+
+function import_all(value) {
+    const number = value;
+
+    // Fetch request to check if the question exists and retrieve data
+    fetch(`/questions/import?number=${number}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            addQuestionToDatabase(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while importing the question.');
+        });
+
+    return false;
+  }
 
 function addQuestionToDatabase(questionData) {
     // Send post request to add the question to the database
