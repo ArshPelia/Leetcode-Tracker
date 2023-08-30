@@ -42,15 +42,47 @@ document.addEventListener('DOMContentLoaded', function() {
         filterConfig.difficulty = selectedDifficulty;
         updateTable();
     });
-
+    
     document.querySelector('#tags-filter').addEventListener('change', event => {
         const selectedTags = Array.from(event.target.selectedOptions).map(option => option.value);
-        filterConfig.tags.push(...selectedTags);
+    
+        selectedTags.forEach(tag => {
+            if (isTagSelected(tag)) {
+                // Tag is already selected, remove it
+                const index = filterConfig.tags.indexOf(tag);
+                filterConfig.tags.splice(index, 1);
+            } else {
+                // Tag is not selected, add it
+                filterConfig.tags.push(tag);
+            }
+        });
+    
         updateTable();
     });
-    
 
+    document.querySelector('#tags-filter').addEventListener('click', event => {
+        const tag = event.target.value;
+    
+        if (isTagSelected(tag)) {
+            // Tag is already selected, remove it
+            const index = filterConfig.tags.indexOf(tag);
+            filterConfig.tags.splice(index, 1);
+        } else {
+            // Tag is not selected, add it
+            filterConfig.tags.push(tag);
+        }
+    
+        updateTable();
+    });
+
+    
+    
+    
 });
+
+function isTagSelected(tag) {
+    return filterConfig.tags.includes(tag);
+}
 
 // Apply filters to questions based on filterConfig
 function applyFilters(questions) {
@@ -68,6 +100,7 @@ function applyFilters(questions) {
 
     return filteredQuestions;
 }
+
 function updateTable() {
     const filteredQuestions = applyFilters(questionsall);
     const table = createQuestionTable(filteredQuestions);
@@ -148,10 +181,6 @@ function loadHome() {
             console.error('Error:', error);
             alert('An error occurred while loading questions.');
         });
-}
-
-function isTagSelected(tag) {
-    return filterConfig.tags.includes(tag);
 }
 
 // Creates and populates a question table
