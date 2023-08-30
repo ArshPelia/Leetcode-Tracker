@@ -44,72 +44,49 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTable();
     });
 
-    document.querySelectorAll('#tag-filters input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', event => {
-            const selectedTag = event.target.value;
-            if (event.target.checked) {
-                filterConfig.tags.push(selectedTag);
-            } else {
-                filterConfig.tags = filterConfig.tags.filter(tag => tag !== selectedTag);
-            }
-            updateTable();
-        });
+    document.querySelector('#tags-filter').addEventListener('change', event => {
+        const selectedTags = Array.from(event.target.selectedOptions).map(option => option.value);
+        filterConfig.tags = selectedTags;
+        updateTable();
     });
+    
+
 });
 
 // Apply filters to questions based on filterConfig
 function applyFilters(questions) {
-    console.log('Applying Filters');
-    console.log('Filter Config:', filterConfig);
-    
     let filteredQuestions = questions;
-    
+
     if (filterConfig.difficulty) {
         filteredQuestions = filteredQuestions.filter(question => question.difficulty === filterConfig.difficulty);
     }
-    
+
     if (filterConfig.tags.length > 0) {
-        filteredQuestions = filteredQuestions.filter(question =>
-            filterConfig.tags.every(tag => question.tags.includes(tag))
-        );
+        filteredQuestions = filteredQuestions.filter(question => {
+            return filterConfig.tags.every(tag => question.tags.includes(tag));
+        });
     }
-    
-    console.log('Filtered Questions:', filteredQuestions);
-    
+
     return filteredQuestions;
 }
-// Update the table with filtered questions
-// ...
 
-// Update the table with filtered questions
 function updateTable() {
-    console.log('Updating Table');
     const filteredQuestions = applyFilters(questionsall);
-    console.log('Filtered Questions:', filteredQuestions);
+    const table = createQuestionTable(filteredQuestions);
 
-    try {
-        const table = createQuestionTable(filteredQuestions);
-        if (!table) {
-            console.log('Table creation failed.');
-            return;
-        }
-
-        const questionView = document.querySelector('#allquestions-view');
-        if (!questionView) {
-            console.log('Question view element not found.');
-            return;
-        }
-
-        const filtersSection = document.querySelector('#filters');
-        questionView.innerHTML = ''; // Clear existing content
-        questionView.appendChild(filtersSection); // Re-append the filters
-        questionView.appendChild(table);
-
-        console.log('Table updated successfully.');
-    } catch (error) {
-        console.error('Error updating table:', error);
+    const questionView = document.querySelector('#allquestions-view');
+    const filtersSection = document.querySelector('#filters');
+    
+    // Clear the table content but keep the filters section
+    while (questionView.firstChild) {
+        questionView.removeChild(questionView.firstChild);
     }
+
+    questionView.appendChild(filtersSection);
+    questionView.appendChild(table);
 }
+
+
 
 // ...
 
@@ -138,7 +115,15 @@ function loadHome() {
             const allQuestionsView = document.querySelector('#allquestions-view');
             // Clear and re-append the filters section
             // filtersSection.innerHTML = '';
-            filtersSection.appendChild(createTagCheckboxes(questions));
+                // Populate the tags dropdown
+            const tagsSelect = document.querySelector('#tags-filter');
+            const uniqueTags = new Set(questionsall.flatMap(question => question.tags.split(', ')));
+            uniqueTags.forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                tagsSelect.appendChild(option);
+            });
             allQuestionsView.appendChild(filtersSection);
             allQuestionsView.appendChild(table);
         })
@@ -146,42 +131,6 @@ function loadHome() {
             console.error('Error:', error);
             alert('An error occurred while loading questions.');
         });
-}
-
-// Create checkboxes for all unique tags
-function createTagCheckboxes(questions) {
-    const tagFiltersDiv = document.createElement('div');
-    tagFiltersDiv.id = 'tag-filters';
-
-    // Find all unique tags
-    const uniqueTags = Array.from(new Set(questions.flatMap(question => question.tags)));
-
-    // Create checkboxes for unique tags
-    uniqueTags.forEach(tag => {
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = `tag-filter-${tag}`;
-        checkbox.value = tag;
-        checkbox.addEventListener('change', event => {
-            const selectedTag = event.target.value;
-            if (event.target.checked) {
-                filterConfig.tags.push(selectedTag);
-            } else {
-                filterConfig.tags = filterConfig.tags.filter(tag => tag !== selectedTag);
-            }
-            updateTable();
-        });
-
-        const label = document.createElement('label');
-        label.htmlFor = `tag-filter-${tag}`;
-        label.textContent = tag;
-
-        tagFiltersDiv.appendChild(checkbox);
-        tagFiltersDiv.appendChild(label);
-        tagFiltersDiv.appendChild(document.createElement('br'));
-    });
-
-    return tagFiltersDiv;
 }
 
 
