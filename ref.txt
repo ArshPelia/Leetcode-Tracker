@@ -1,3 +1,0 @@
-API call to get leetcode question: 
-    https://github.com/chentze02/leetcode-notion-tracker/blob/main/leetcode-tracker.py
-
