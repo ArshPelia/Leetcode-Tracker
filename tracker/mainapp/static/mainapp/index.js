@@ -7,7 +7,6 @@ const filterConfig = {
 // Global variable to store the loaded questions data
 let questionsall = [];
 
-
 /* when the DOM content of the page has been loaded, 
   we attach event listeners to each of the buttons. 
   
@@ -46,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelector('#tags-filter').addEventListener('change', event => {
         const selectedTags = Array.from(event.target.selectedOptions).map(option => option.value);
-        filterConfig.tags = selectedTags;
+        filterConfig.tags.push(...selectedTags);
         updateTable();
     });
     
@@ -69,24 +68,42 @@ function applyFilters(questions) {
 
     return filteredQuestions;
 }
-
 function updateTable() {
     const filteredQuestions = applyFilters(questionsall);
     const table = createQuestionTable(filteredQuestions);
 
     const questionView = document.querySelector('#allquestions-view');
     const filtersSection = document.querySelector('#filters');
-    
+
     // Clear the table content but keep the filters section
     while (questionView.firstChild) {
         questionView.removeChild(questionView.firstChild);
     }
 
     questionView.appendChild(filtersSection);
+
+    // Inside the loadHome function or where you're populating the tags dropdown
+    const tagsSelect = document.querySelector('#tags-filter');
+    const uniqueTags = new Set(questionsall.flatMap(question => question.tags.split(', ')));
+
+    // Clear existing options before repopulating
+    tagsSelect.innerHTML = '';
+
+    uniqueTags.forEach(tag => {
+        const option = document.createElement('option');
+        option.value = tag;
+        option.textContent = tag;
+
+        if (isTagSelected(tag)) {
+            option.selected = true; // Mark the option as selected
+        }
+
+        tagsSelect.appendChild(option);
+    });
+
     questionView.appendChild(table);
+    console.log(filterConfig);
 }
-
-
 
 // ...
 
@@ -133,10 +150,12 @@ function loadHome() {
         });
 }
 
+function isTagSelected(tag) {
+    return filterConfig.tags.includes(tag);
+}
 
 // Creates and populates a question table
 function createQuestionTable(questions) {
-    console.log('Creating table with questions:', questions);
     
     const table = document.createElement('table');
     table.classList.add('table', 'table-striped', 'table-hover');
@@ -158,10 +177,8 @@ function createQuestionTable(questions) {
         });
     });
 
-    console.log('Table created:', table);
     return table;
 }
-
 
 // Clears form fields and removes validation classes
 function clearFormFields(fieldIds) {
@@ -196,8 +213,6 @@ function addQuestion() {
     const solvedFirstTimeCheckbox = document.querySelector('#solved-first-time');
     const solvedFirstTime = solvedFirstTimeCheckbox.checked;
 
-    console.log(difficulty)
-
     // Send post request to upload a new question
     fetch('/questions/create', {
         method: 'POST',
@@ -217,7 +232,6 @@ function addQuestion() {
     .then(response => response.json())
     .then(result => {
         // Print result
-        console.log(result);
         alert(JSON.stringify(result));
         clearFormFields(['title', 'number', 'description', 'tags', 'url', 'solved-first-time']);
 
@@ -244,7 +258,6 @@ function addNote(questionNumber, content) {
     .then(response => response.json())
     .then(result => {
         // Print result
-        console.log(result);
 
         // Add the new note to the notes list
         const notesList = document.getElementById('notes-list');
@@ -336,7 +349,6 @@ function addQuestionToDatabase(questionData) {
     .then(response => response.json())
     .then(result => {
         // Print result
-        console.log(result);
         alert(JSON.stringify(result));
         clearFormFields(['number']);
     })
