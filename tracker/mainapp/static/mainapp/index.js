@@ -291,6 +291,7 @@ function addQuestion() {
 }
 
 function addNote(questionNumber, content) {
+    console.log('noting')
     fetch('/questions/createnote', {  // Make sure the URL path is correct
         method: 'POST',
         headers: {
@@ -322,6 +323,7 @@ function addNote(questionNumber, content) {
 
 function importQ(){
     const number = document.querySelector('#import-number').value;
+    const note = document.querySelector('#note').value;
 
     // Fetch request to check if the question exists and retrieve data
     fetch(`/questions/import?number=${number}`)
@@ -337,6 +339,7 @@ function importQ(){
             const confirmMessage = `Do you want to add the question "${data.title}" (${data.difficulty}) to the database?`;
             if (confirm(confirmMessage)) {
                 // User confirmed, proceed to add question to the database
+                addNote(data.frontendQuestionId, note)
                 addQuestionToDatabase(data);
             }
         })
